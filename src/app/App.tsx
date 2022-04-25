@@ -1,15 +1,15 @@
 import React, {useEffect} from 'react';
 import './App.css';
 import {Login} from '../features/Login/Login';
-import {Route, Routes, Navigate} from 'react-router-dom';
+import {Route, Routes, Navigate, Link} from 'react-router-dom';
 import TodoLists from '../features/Todolists/TodoLists';
-import {AppBar, Button, CircularProgress, IconButton, LinearProgress, Toolbar, Typography} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import {AppBar, Button, CircularProgress, LinearProgress, Toolbar, Typography} from "@mui/material";
 import {useAppSelector} from "./store";
 import {initializeAppTC, RequestStatusType} from "./app-reducer";
 import {useDispatch} from "react-redux";
 import {logoutTC} from "./auth-reducer";
 import {ErrorSnackbar} from "../components/ErrorSnackbar/ErrorSnackbar";
+import {NotFound} from "../features/NotFound/NotFound";
 
 function App() {
 
@@ -37,21 +37,18 @@ function App() {
         <>
             <AppBar position="static">
                 <Toolbar style={{justifyContent: "space-between"}}>
-                    <IconButton edge={"start"} color={"inherit"} arial-label={"menu"}>
-                        <MenuIcon/>
-                    </IconButton>
-                    <Typography variant={"h6"}>
-                        Todolists
-                    </Typography>
+                    <Link to={"/"} style={{ textDecoration: 'none', color: 'unset' }}><Typography variant={"h6"}>Todolists</Typography></Link>
                     {isLogin && <Button color={"inherit"} variant={"outlined"} onClick={onClickHandler}>Logout</Button>
                     }
                 </Toolbar>
             </AppBar>
-            {status === "loading" && <LinearProgress/>}
+            <div style={{height: "10px"}}>
+                {status === "loading" && <LinearProgress/>}
+            </div>
             <Routes>
                 <Route path={"/"} element={<TodoLists/>}/>
                 <Route path="login" element={<Login/>}/>
-                <Route path="404" element={<div>404</div>}/>
+                <Route path="404" element={<NotFound/>}/>
                 <Route path="*" element={<Navigate to="/404"/>}/>
             </Routes>
             <ErrorSnackbar/>
