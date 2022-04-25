@@ -1,8 +1,8 @@
 import {todolistAPI, TodoListType} from "../../../api/todolist-api";
-import {Dispatch} from "redux";
 import {AppActionType, RequestStatusType, setStatus} from "../../../app/app-reducer";
 import {AxiosError} from "axios";
 import {handleServerAppError, handleServerNetworkError} from "../../../utils/error";
+import {AppThunk} from "../../../app/store";
 
 export enum ResultCode {
     "success" = 0,
@@ -12,7 +12,7 @@ export enum ResultCode {
 
 // reducer
 
-export const todolistsReducer = (state: Array<TodoListDomainType> = [], action: ActionType): Array<TodoListDomainType> => {
+export const todolistsReducer = (state: Array<TodoListDomainType> = [], action: TodolistsActionType): Array<TodoListDomainType> => {
     switch (action.type) {
         case "TODOLIST-REMOVED":
             return state.filter(el => el.id !== action.id)
@@ -47,23 +47,26 @@ export const setTodolistStatus = (id: string, status: RequestStatusType) => ({
 
 // thunks
 
-export const fetchTodoLists = (dispatch: Dispatch<ActionType>) => {
+export const fetchTodoLists = (): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
-    todolistAPI.getTodoLists().then(response => {
+    todolistAPI.getTodoLists().then(res => {
             dispatch(setStatus("succeeded"))
-            dispatch(setTodoLists(response.data))
+            dispatch(setTodoLists(res.data))
+        }
+    ).catch((err: AxiosError) => {
+            handleServerNetworkError(dispatch, err.message)
         }
     )
 }
 
-export const addTodolistTC = (title: string) => (dispatch: Dispatch<ActionType>) => {
+export const addTodolistTC = (title: string): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
     todolistAPI.postTodolist(title).then((res) => {
         if (res.data.resultCode === ResultCode.success) {
             dispatch(addTodolist(res.data.data.item))
             dispatch(setStatus("succeeded"))
         } else {
-            handleServerAppError<{item: TodoListType}>(res.data, dispatch)
+            handleServerAppError<{ item: TodoListType }>(res.data, dispatch)
         }
     }).catch((err: AxiosError) => {
             handleServerNetworkError(dispatch, err.message)
@@ -71,36 +74,43 @@ export const addTodolistTC = (title: string) => (dispatch: Dispatch<ActionType>)
     )
 }
 
-export const removeTodolistTC = (id: string) => (dispatch: Dispatch<ActionType>) => {
+export const removeTodolistTC = (id: string): AppThunk => (dispatch) => {
     dispatch(setTodolistStatus(id, "loading"))
     todolistAPI.deleteTodoList(id).then(() => {
         dispatch(setTodolistStatus(id, "succeeded"))
         dispatch(removeTodolist(id))
-    })
+    }).catch((err: AxiosError) => {
+            handleServerNetworkError(dispatch, err.message)
+        }
+    )
 }
 
-export const changeTodolistTitleTC = (todolistID: string, title: string) => (dispatch: Dispatch<ActionType>) => {
+export const changeTodolistTitleTC = (todolistID: string, title: string): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
     todolistAPI.updateTodoListTitle(todolistID, title).then(() => {
         dispatch(setStatus("succeeded"))
         dispatch(changeTodolistTitle(todolistID, title))
-    })
+    }).catch((err: AxiosError) => {
+            handleServerNetworkError(dispatch, err.message)
+        }
+    )
 }
 
 // types
 
 export type TodoListDomainType = TodoListType & { filter: FilterType, entityStatus: RequestStatusType }
 
-export type ActionType =
+export type TodolistsActionType =
     RemoveTodolistType
     | AddTodolistType
+    | SetTodoListsType
     | ReturnType<typeof changeTodolistFilter>
     | ReturnType<typeof changeTodolistTitle>
     | ReturnType<typeof setTodolistStatus>
-    | SetTodoListsType
     | AppActionType
 
-export type FilterType = "all" | "active" | "complete"
 export type RemoveTodolistType = ReturnType<typeof removeTodolist>
 export type AddTodolistType = ReturnType<typeof addTodolist>
 export type SetTodoListsType = ReturnType<typeof setTodoLists>
+
+export type FilterType = "all" | "active" | "complete"

@@ -1,9 +1,9 @@
-import {Dispatch} from "redux";
 import {authAPI, LoginParamsType} from "../api/todolist-api";
 import {ResultCode} from "../features/Todolists/Todolist/todolist-reducer";
 import {handleServerAppError, handleServerNetworkError} from "../utils/error";
 import {AxiosError} from "axios";
 import {setStatus} from "./app-reducer";
+import {AppThunk} from "./store";
 
 const initialState = {
     isLogin: false
@@ -11,7 +11,7 @@ const initialState = {
 
 // reducer
 
-export const authReducer = (state: initialStateType = initialState, action: AppActionType): initialStateType => {
+export const authReducer = (state: initialStateType = initialState, action: AuthActionType): initialStateType => {
     switch (action.type) {
         case "AUTH/IS-LOGGED-IN-SET":
             return {...state, ...action.payload}
@@ -26,7 +26,7 @@ export const setIsLoggedIn = (isLogin: boolean) => ({type: "AUTH/IS-LOGGED-IN-SE
 
 // thunk
 
-export const loginTC = (loginParams: LoginParamsType) => (dispatch: Dispatch) => {
+export const loginTC = (loginParams: LoginParamsType): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
     authAPI.login(loginParams).then(res => {
         if (res.data.resultCode === ResultCode.success) {
@@ -37,12 +37,12 @@ export const loginTC = (loginParams: LoginParamsType) => (dispatch: Dispatch) =>
         }
     })
         .catch((err: AxiosError) => {
-            handleServerNetworkError(dispatch, err.message)
-        }
-    )
+                handleServerNetworkError(dispatch, err.message)
+            }
+        )
 }
 
-export const logoutTC = () => (dispatch: Dispatch) => {
+export const logoutTC = (): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
     authAPI.logout().then(res => {
         if (res.data.resultCode === ResultCode.success) {
@@ -62,4 +62,4 @@ export const logoutTC = () => (dispatch: Dispatch) => {
 
 type initialStateType = typeof initialState
 
-export type AppActionType = ReturnType<typeof setIsLoggedIn>
+export type AuthActionType = ReturnType<typeof setIsLoggedIn>

@@ -17,7 +17,7 @@ const TodoLists = () => {
         if (!isLogin) {
             return
         }
-        dispatch(fetchTodoLists)
+        dispatch(fetchTodoLists())
     }, [])
 
 

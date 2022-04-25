@@ -1,9 +1,9 @@
-import {Dispatch} from "redux";
 import {authAPI, MeResponseType} from "../api/todolist-api";
 import {ResultCode} from "../features/Todolists/Todolist/todolist-reducer";
 import {handleServerAppError, handleServerNetworkError} from "../utils/error";
 import {AxiosError} from "axios";
 import {setIsLoggedIn} from "./auth-reducer";
+import {AppThunk} from "./store";
 
 export type RequestStatusType = "idle" | "loading" | "succeeded" | "failed"
 
@@ -39,7 +39,7 @@ export const setIsInitialized = (isInitialized: boolean) => ({
 
 // thunks
 
-export const initializeAppTC = () => (dispatch: Dispatch) => {
+export const initializeAppTC = (): AppThunk => (dispatch) => {
     authAPI.authMe().then((res) => {
         if (res.data.resultCode === ResultCode.success) {
             dispatch(setIsLoggedIn(true))

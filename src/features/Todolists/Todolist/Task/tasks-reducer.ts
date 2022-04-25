@@ -4,30 +4,29 @@ import {
     UpdateModalTaskType
 } from "../../../../api/todolist-api";
 import {AddTodolistType, RemoveTodolistType, ResultCode, SetTodoListsType} from "../todolist-reducer";
-import {Dispatch} from "redux";
-import {RootStateType} from "../../../../app/store";
+import {AppThunk, RootStateType} from "../../../../app/store";
 import {AppActionType, setStatus} from "../../../../app/app-reducer";
 import {AxiosError} from "axios";
 import {handleServerAppError, handleServerNetworkError} from "../../../../utils/error";
 
 // reducer
 
-export const taskReducer = (state: TaskStateType = {}, action: ActionType): TaskStateType => {
+export const taskReducer = (state: TaskStateType = {}, action: TasksActionType): TaskStateType => {
     switch (action.type) {
         case "TASKS_SET":
             return {...state, [action.payload.id]: action.payload.tasks}
         case "TODOLISTS-SET": {
-            const copystate = {...state}
+            const copyState = {...state}
             action.payload.forEach(el => {
-                    return copystate[el.id] = []
+                    return copyState[el.id] = []
                 }
             )
-            return copystate
+            return copyState
         }
         case "TODOLIST-REMOVED": {
-            const copystate = {...state}
-            delete copystate[action.id]
-            return copystate
+            const copyState = {...state}
+            delete copyState[action.id]
+            return copyState
         }
         case "TODOLIST-ADDED":
             return {
@@ -75,16 +74,19 @@ export const setTasks = (tasks: TaskType[], id: string) => ({type: "TASKS_SET", 
 
 // thunks
 
-export const fetchTasks = (id: string) => (dispatch: Dispatch) => {
+export const fetchTasks = (id: string): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
     taskAPI.getTask(id).then(res => {
             dispatch(setStatus("succeeded"))
             dispatch(setTasks(res.data.items, id))
         }
+    ).catch((err: AxiosError) => {
+            handleServerNetworkError(dispatch, err.message)
+        }
     )
 }
 
-export const addTaskTC = (todolistId: string, title: string) => (dispatch: Dispatch) => {
+export const addTaskTC = (todolistId: string, title: string): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
     taskAPI.postTask(todolistId, title).then(res => {
         if (res.data.resultCode === ResultCode.success) {
@@ -99,8 +101,8 @@ export const addTaskTC = (todolistId: string, title: string) => (dispatch: Dispa
     )
 }
 
-export const changeTaskStatusTC = (todolistID: string, taskID: string, status: number) =>
-    (dispatch: Dispatch<ActionType>, getState: () => RootStateType) => {
+export const changeTaskStatusTC = (todolistID: string, taskID: string, status: number): AppThunk =>
+    (dispatch, getState: () => RootStateType) => {
         dispatch(setStatus("loading"))
 
         const currentTask = getState().tasks[todolistID].find(el => el.id === taskID)
@@ -120,12 +122,15 @@ export const changeTaskStatusTC = (todolistID: string, taskID: string, status: n
                     dispatch(changeTaskStatus(status, todolistID, taskID))
 
                 }
+            ).catch((err: AxiosError) => {
+                    handleServerNetworkError(dispatch, err.message)
+                }
             )
         }
     }
 
-export const changeTaskTitleTC = (todolistID: string, taskID: string, title: string) =>
-    (dispatch: Dispatch<ActionType>, getState: () => RootStateType) => {
+export const changeTaskTitleTC = (todolistID: string, taskID: string, title: string): AppThunk =>
+    (dispatch, getState: () => RootStateType) => {
 
         dispatch(setStatus("loading"))
 
@@ -146,16 +151,22 @@ export const changeTaskTitleTC = (todolistID: string, taskID: string, title: str
                     dispatch(setStatus("succeeded"))
                     dispatch(changeTaskText(title, todolistID, taskID))
                 }
+            ).catch((err: AxiosError) => {
+                    handleServerNetworkError(dispatch, err.message)
+                }
             )
         }
     }
 
-export const deleteTaskTC = (todolistID: string, taskID: string) => (dispatch: Dispatch<ActionType>) => {
+export const deleteTaskTC = (todolistID: string, taskID: string): AppThunk => (dispatch) => {
     dispatch(setStatus("loading"))
     taskAPI.deleteTask(todolistID, taskID).then(res => {
         dispatch(setStatus("succeeded"))
         dispatch(deleteTask(taskID, todolistID))
-    })
+    }).catch((err: AxiosError) => {
+            handleServerNetworkError(dispatch, err.message)
+        }
+    )
 }
 
 // types
@@ -163,7 +174,8 @@ export const deleteTaskTC = (todolistID: string, taskID: string) => (dispatch: D
 export type TaskStateType = {
     [todolistId: string]: Array<TaskType>
 }
-type ActionType =
+
+export type TasksActionType =
     RemoveTodolistType
     | AddTodolistType
     | ReturnType<typeof deleteTask>
