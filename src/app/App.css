@@ -1,0 +1,26 @@
+.App {
+  padding: 30px;
+  display: flex;
+}
+
+.App > div {
+  margin-right: 50px;
+}
+
+.error{
+  outline: none;
+  border: 1px solid red;
+}
+
+.error-message{
+  color: red;
+}
+
+.btnActive{
+  background-color: blue;
+}
+
+.isDone {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
