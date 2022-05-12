@@ -1,8 +1,11 @@
 import {v1} from "uuid"
 import {
+    addTodolist,
+    changeTodolistFilter,
+    changeTodolistTitle,
     removeTodolist,
     TodoListDomainType,
-    todolistsReducer,
+    todoListReducer,
 } from "./todolist-reducer";
 
 let todolist_1: string
@@ -23,6 +26,14 @@ beforeEach(() => {
             filter: "all",
             entityStatus: "loading"
         },
+        {
+            id: todolist_2,
+            title: "What to eat",
+            addedDate: Date(),
+            order: "1",
+            filter: "all",
+            entityStatus: "loading"
+        },
     ]
 })
 
@@ -30,71 +41,84 @@ test("todolist should be deleted", () => {
 
         // test data
 
-        const action = removeTodolist(todolist_2)
+        const action = removeTodolist({id: todolist_2})
 
         // running of testing code
 
-        const endState = todolistsReducer(startState, action)
+        const endState = todoListReducer(startState, action)
 
         // checking of result
 
         expect(endState).toEqual([
-            {id: todolist_1, title: "What to learn", filter: "all"}
+            {
+                id: todolist_1,
+                title: "What to learn",
+                addedDate: Date(),
+                order: "1",
+                filter: "all",
+                entityStatus: "loading"
+            }
         ])
         expect(endState.length).toBe(1)
 
     }
 )
-//
-// test("todolist should be added", () => {
-//
-//         // test data
-//
-//         const action = addTodolist("What to eat")
-//
-//         // running of testing code
-//
-//         const endState = todolistsReducer(startState, action)
-//
-//         // checking of result
-//
-//         expect(endState.length).toBe(3)
-//         expect(endState[2].title).toBe("What to eat")
-//         expect(endState[2].filter).toBe("all")
-//
-//     }
-// )
 
-// test("todolist title should be changed", () => {
-//
-//         // test data
-//
-//         const action = changeTodolistTitle(todolist_1, "What to sell")
-//
-//         // running of testing code
-//
-//         const endState = todolistsReducer(startState, action)
-//
-//         // checking of result
-//
-//         expect(endState[0].title).toBe("What to sell")
-//
-//     }
-// )
+test("todolist should be added", () => {
 
-// test("todolist filter should be changed", () => {
-//
-//         // test data
-//
-//         const action = changeTodolistFilter(todolist_2, "complete")
-//
-//         // running of testing code
-//
-//         const endState = todolistsReducer(startState, action)
-//
-//         // checking of result
-//
-//         expect(endState[1].filter).toBe("complete")
-//
-//     }
-// )
+        // test data
+
+        const newTodoList = {
+            id: v1(),
+            title: "What to eat",
+            addedDate: new Date().getDate().toString(),
+            order: "10"
+        }
+        const action = addTodolist({todoList: newTodoList})
+
+        // running of testing code
+
+        const endState = todoListReducer(startState, action)
+
+        // checking of result
+
+        expect(endState.length).toBe(3)
+        expect(endState[2].title).toBe("What to eat")
+        expect(endState[2].filter).toBe("all")
+
+    }
+)
+
+test("todolist title should be changed", () => {
+
+        // test data
+
+        const action = changeTodolistTitle({title: "What to sell", id: todolist_1})
+
+        // running of testing code
+
+        const endState = todoListReducer(startState, action)
+
+        // checking of result
+
+        expect(endState[0].title).toBe("What to sell")
+
+    }
+)
+
+test("todolist filter should be changed", () => {
+
+        // test data
+
+        const action = changeTodolistFilter({filter: "complete", id: todolist_2})
+
+        // running of testing code
+
+        const endState = todoListReducer(startState, action)
+
+        // checking of result
+
+        expect(endState[1].filter).toBe("complete")
+
+    }
+)

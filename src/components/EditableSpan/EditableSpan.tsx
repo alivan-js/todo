@@ -19,7 +19,7 @@ const EditableSpan = React.memo((props: EditableSpanPropsType) => {
         if (title.trim()) {
             props.changeText(title.trim())
         } else {
-            dispatch(setError("Title must not be empty"))
+            dispatch(setError({error: "Title must not be empty"}))
             setTitle(props.text)
         }
         setEditForm(false)

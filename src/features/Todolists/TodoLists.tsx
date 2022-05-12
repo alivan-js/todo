@@ -8,7 +8,7 @@ import AddItemForm from "../../components/AddItemForm/AddItemForm";
 import {Navigate} from 'react-router-dom';
 
 const TodoLists = () => {
-    const todolists = useSelector<RootStateType, TodoListDomainType[]>(state => state.todolists)
+    const todolists = useSelector<RootStateType, TodoListDomainType[]>(state => state.todoLists)
     const dispatch = useDispatch()
     const isLogin = useAppSelector<boolean>(state => state.auth.isLogin)
 

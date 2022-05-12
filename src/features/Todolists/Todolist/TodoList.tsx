@@ -59,15 +59,15 @@ const TodoList = React.memo((props: ToDoListProps) => {
     }, [dispatch, props.todolist.id])
 
     const onAllClickHandler = useCallback(() => {
-        dispatch(changeTodolistFilter(props.todolist.id, "all"))
+        dispatch(changeTodolistFilter({id: props.todolist.id, filter: "all"}))
     }, [dispatch, props.todolist.id])
 
     const onCompleteClickHandler = useCallback(() => {
-        dispatch(changeTodolistFilter(props.todolist.id, "complete"))
+        dispatch(changeTodolistFilter({id: props.todolist.id, filter: "complete"}))
     }, [dispatch, props.todolist.id])
 
     const onActiveClickHandler = useCallback(() => {
-        dispatch(changeTodolistFilter(props.todolist.id, "active"))
+        dispatch(changeTodolistFilter({id: props.todolist.id, filter: "active"}))
     }, [dispatch, props.todolist.id])
 
     const filteredTasks = useMemo(() => {
