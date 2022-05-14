@@ -1,8 +1,14 @@
 // @ts-ignore
 import {v1} from "uuid";
-import {addTask, changeTaskStatus, changeTaskText, deleteTask, taskReducer, TaskStateType} from "./tasks-reducer";
+import {
+    addTaskTC, changeTaskStatusTC, changeTaskTitleTC,
+    deleteTaskTC,
+    fetchTasks,
+    taskReducer,
+    TaskStateType
+} from "./tasks-reducer";
 import {TaskPriorities, TaskStatusType} from "../../../../api/todolist-api";
-import { addTodolist, removeTodolist } from "../todolist-reducer";
+import {addTodolistTC, removeTodolistTC} from "../todolist-reducer";
 
 let todolist_2: string
 let todolist_1: string
@@ -53,7 +59,10 @@ test("task should be deleted", () => {
 
         // test data
 
-        const action = deleteTask({id: firstTaskId, todolistID: todolist_1})
+        const action = deleteTaskTC.fulfilled({id: firstTaskId, todolistID: todolist_1}, "", {
+            todolistID: todolist_1,
+            taskID: firstTaskId
+        })
 
         // running of testing code
 
@@ -84,7 +93,7 @@ test("task should be added", () => {
             todoListId: todolist_1
         }
 
-        const action = addTask({task: task})
+        const action = addTaskTC.fulfilled({task: task}, "", {todolistId: todolist_1, title: task.title})
 
         // running of testing code
 
@@ -93,16 +102,20 @@ test("task should be added", () => {
         // checking of result
 
         expect(endState[todolist_1].length).toBe(3)
-        expect(endState[todolist_1][2].title).toBe("Tea")
+        expect(endState[todolist_1][0].title).toBe("Tea")
 
     }
 )
 
-test("task text should be changed", () => {
+test("task title should be changed", () => {
 
         // test data
 
-        const action = changeTaskText({taskID: firstTaskId, title: "PHP", todolistID: todolist_1})
+        const action = changeTaskTitleTC.fulfilled({
+            title: "PHP",
+            taskID: firstTaskId,
+            todolistID: todolist_1,
+        }, "", {todolistID: todolist_1, taskID: firstTaskId, title: "PHP"})
 
         // running of testing code
 
@@ -120,7 +133,11 @@ test("task status should be changed", () => {
 
         // test data
 
-        const action = changeTaskStatus({status: 2, taskID: firstTaskId, todolistID: todolist_1})
+        const action = changeTaskStatusTC.fulfilled({
+            status: 2,
+            taskID: firstTaskId,
+            todolistID: todolist_1
+        }, "", {todolistID: todolist_1, taskID: firstTaskId, status: 2})
 
         // running of testing code
 
@@ -144,7 +161,7 @@ test("new todolist with empty array of tasks should be added", () => {
             order: "10"
         }
 
-        const action = addTodolist({todoList: newTodoList})
+        const action = addTodolistTC.fulfilled({todoList: newTodoList}, "", {title: "What to..."})
 
         // running of testing code
 
@@ -162,7 +179,7 @@ test("todolist with array of tasks should be deleted", () => {
 
         // test data
 
-        const action = removeTodolist({id: todolist_2})
+        const action = removeTodolistTC.fulfilled({id: todolist_2}, "", {id: todolist_2})
 
         // running of testing code
 
@@ -172,6 +189,53 @@ test("todolist with array of tasks should be deleted", () => {
         // checking of result
 
         expect(keys.length).toBe(1)
+
+    }
+)
+
+test("todolist should be filled with tasks", () => {
+
+        // test data
+
+        const state = {
+            [todolist_1]: []
+        }
+
+        const tasks = [{
+            addedDate: new Date().getDate().toString(),
+            deadline: new Date().getDate().toString(),
+            description: "",
+            id: firstTaskId,
+            order: 1,
+            priority: TaskPriorities.Low,
+            startDate: new Date().getDate().toString(),
+            status: TaskStatusType.New,
+            title: "JS",
+            todoListId: todolist_1,
+        },
+            {
+                addedDate: new Date().getDate().toString(),
+                deadline: new Date().getDate().toString(),
+                description: "",
+                id: secondTaskId,
+                order: 1,
+                priority: TaskPriorities.Low,
+                startDate: new Date().getDate().toString(),
+                status: TaskStatusType.New,
+                title: "Go",
+                todoListId: todolist_1,
+            },
+        ]
+
+        const action = fetchTasks.fulfilled({id: todolist_1, tasks}, "", todolist_1)
+
+        // running of testing code
+
+        const endState = taskReducer(state, action)
+
+        // checking of result
+
+        expect(endState[todolist_1].length).toBe(2)
 
     }
 )

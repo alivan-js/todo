@@ -5,11 +5,13 @@ import {action} from "@storybook/addon-actions"
 import Task from './Task';
 import {v1} from "uuid";
 import {TaskPriorities, TaskStatusType} from "../../../../api/todolist-api";
+import {ReduxStoreProviderDecorator} from "../../../../utils/ReduxStoreProviderDecorator";
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
     title: 'TODOLIST/Task',
     component: Task,
+    decorators: [ReduxStoreProviderDecorator]
 } as ComponentMeta<typeof Task>;
 
 const Template: ComponentStory<typeof Task> = () => {

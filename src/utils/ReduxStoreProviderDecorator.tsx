@@ -9,7 +9,7 @@ import {appReducer} from "../app/app-reducer";
 import {authReducer} from "../app/auth-reducer";
 import {configureStore} from "@reduxjs/toolkit";
 import thunk from "redux-thunk";
-import {RootStateType, store} from '../app/store';
+import {RootStateType} from '../app/store';
 
 const rootReducer = combineReducers({
     tasks: taskReducer,
@@ -75,7 +75,7 @@ export const StoryBookStore = configureStore({
 
 export const ReduxStoreProviderDecorator = (Component: () => React.ReactNode) => {
     return (
-        <Provider store={store}>
+        <Provider store={StoryBookStore}>
             {Component()}
         </Provider>
     );

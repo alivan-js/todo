@@ -1,9 +1,7 @@
 import {v1} from "uuid"
 import {
-    addTodolist,
-    changeTodolistFilter,
-    changeTodolistTitle,
-    removeTodolist,
+    addTodolistTC,
+    changeTodolistFilter, changeTodolistTitleTC, removeTodolistTC,
     TodoListDomainType,
     todoListReducer,
 } from "./todolist-reducer";
@@ -41,7 +39,7 @@ test("todolist should be deleted", () => {
 
         // test data
 
-        const action = removeTodolist({id: todolist_2})
+        const action = removeTodolistTC.fulfilled({id: todolist_2}, "", {id: todolist_2})
 
         // running of testing code
 
@@ -74,7 +72,7 @@ test("todolist should be added", () => {
             addedDate: new Date().getDate().toString(),
             order: "10"
         }
-        const action = addTodolist({todoList: newTodoList})
+        const action = addTodolistTC.fulfilled({todoList: newTodoList}, "", {title: "What to eat"})
 
         // running of testing code
 
@@ -93,7 +91,10 @@ test("todolist title should be changed", () => {
 
         // test data
 
-        const action = changeTodolistTitle({title: "What to sell", id: todolist_1})
+        const action = changeTodolistTitleTC.fulfilled({title: "What to sell", id: todolist_1}, "", {
+            id: todolist_1,
+            title: "What to sell"
+        })
 
         // running of testing code
 

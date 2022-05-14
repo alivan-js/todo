@@ -1,62 +1,76 @@
-import {authAPI, LoginParamsType} from "../api/todolist-api";
+import {authAPI, FieldsErrorsType, LoginParamsType} from "../api/todolist-api";
 import {ResultCode} from "../features/Todolists/Todolist/todolist-reducer";
 import {handleServerAppError, handleServerNetworkError} from "../utils/error";
-import {AxiosError} from "axios";
+import axios from "axios";
 import {setStatus} from "./app-reducer";
-import {AppThunk} from "./store";
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 
-const initialState = {
-    isLogin: false
-}
+// thunks
+
+export const loginTC = createAsyncThunk<undefined, LoginParamsType, { rejectValue: { errors: string[], fieldsErrors?: FieldsErrorsType[] } }>
+("auth/login", async (param: LoginParamsType, thunkAPI) => {
+        thunkAPI.dispatch(setStatus({status: "loading"}))
+        try {
+            const res = await authAPI.login(param)
+            if (res.data.resultCode === ResultCode.success) {
+                thunkAPI.dispatch(setStatus({status: "succeeded"}))
+                return
+            } else {
+                handleServerAppError<{ userId: number }>(res.data, thunkAPI.dispatch)
+                return thunkAPI.rejectWithValue({errors: res.data.messages, fieldsErrors: res.data.fieldsErrors})
+            }
+        } catch (err) {
+            let error: string = "Some error occurred"
+            if (axios.isAxiosError(err)) {
+                error = err.message
+            }
+            handleServerNetworkError(thunkAPI.dispatch, error)
+            return thunkAPI.rejectWithValue({errors: [error], fieldsErrors: undefined})
+        }
+    }
+)
+
+export const logoutTC = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
+    thunkAPI.dispatch(setStatus({status: "loading"}))
+    try {
+        const res = await authAPI.logout()
+        if (res.data.resultCode === ResultCode.success) {
+            thunkAPI.dispatch(setStatus({status: "succeeded"}))
+            return
+        } else {
+            handleServerAppError<{}>(res.data, thunkAPI.dispatch)
+            return thunkAPI.rejectWithValue({})
+        }
+    } catch (err) {
+        let error: string = "Some error occurred"
+        if (axios.isAxiosError(err)) {
+            error = err.message
+        }
+        handleServerNetworkError(thunkAPI.dispatch, error)
+        return thunkAPI.rejectWithValue({})
+    }
+})
+
+// slice
 
 const authSlice = createSlice({
     name: "auth",
-    initialState,
+    initialState: {
+        isLogin: false
+    },
     reducers: {
-        setIsLoggedIn (state, action: PayloadAction<{isLogin: boolean}>) {
-            state.isLogin = action.payload.isLogin
+        setIsLoggedIn(state) {
+            state.isLogin = true
         }
+    },
+    extraReducers: (builder) => {
+        builder.addCase(loginTC.fulfilled, (state) => {
+            state.isLogin = true
+        }).addCase(logoutTC.fulfilled, (state) => {
+            state.isLogin = false
+        })
     }
 })
 
 export const {setIsLoggedIn} = authSlice.actions
 export const authReducer = authSlice.reducer
-
-// thunk
-
-export const loginTC = (loginParams: LoginParamsType): AppThunk => (dispatch) => {
-    dispatch(setStatus({status: "loading"}))
-    authAPI.login(loginParams).then(res => {
-        if (res.data.resultCode === ResultCode.success) {
-            dispatch(setIsLoggedIn({isLogin: true}))
-            dispatch(setStatus({status: "succeeded"}))
-        } else {
-            handleServerAppError<{ userId: number }>(res.data, dispatch)
-        }
-    })
-        .catch((err: AxiosError) => {
-                handleServerNetworkError(dispatch, err.message)
-            }
-        )
-}
-
-export const logoutTC = (): AppThunk => (dispatch) => {
-    dispatch(setStatus({status: "loading"}))
-    authAPI.logout().then(res => {
-        if (res.data.resultCode === ResultCode.success) {
-            dispatch(setIsLoggedIn({isLogin: false}))
-            dispatch(setStatus({status: "succeeded"}))
-        } else {
-            handleServerAppError<{}>(res.data, dispatch)
-        }
-    })
-        .catch((err: AxiosError) => {
-                handleServerNetworkError(dispatch, err.message)
-            }
-        )
-}
-
-// types
-
-export type AuthActionType = ReturnType<typeof setIsLoggedIn>

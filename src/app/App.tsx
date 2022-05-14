@@ -37,7 +37,8 @@ function App() {
         <>
             <AppBar position="static">
                 <Toolbar style={{justifyContent: "space-between"}}>
-                    <Link to={"/"} style={{ textDecoration: 'none', color: 'unset' }}><Typography variant={"h6"}>Todolists</Typography></Link>
+                    <Link to={"/"} style={{textDecoration: 'none', color: 'unset'}}><Typography
+                        variant={"h6"}>Todolists</Typography></Link>
                     {isLogin && <Button color={"inherit"} variant={"outlined"} onClick={onClickHandler}>Logout</Button>
                     }
                 </Toolbar>

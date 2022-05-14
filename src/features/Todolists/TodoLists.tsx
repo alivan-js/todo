@@ -22,7 +22,7 @@ const TodoLists = () => {
 
 
     const addTodoListCallback = useCallback((title: string) => {
-        dispatch(addTodolistTC(title))
+        dispatch(addTodolistTC({title}))
     }, [dispatch])
 
     const todolistComponents = todolists.map(el => {

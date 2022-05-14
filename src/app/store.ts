@@ -1,11 +1,11 @@
-import { configureStore } from "@reduxjs/toolkit";
-import {TypedUseSelectorHook, useSelector} from "react-redux";
-import {applyMiddleware, combineReducers, createStore} from "redux";
-import thunk, {ThunkAction} from "redux-thunk";
-import {taskReducer, TasksActionType} from "../features/Todolists/Todolist/Task/tasks-reducer";
-import {todoListReducer, TodolistsActionType} from "../features/Todolists/Todolist/todolist-reducer";
-import {AppActionType, appReducer} from "./app-reducer";
-import {AuthActionType, authReducer} from "./auth-reducer";
+import {configureStore} from "@reduxjs/toolkit";
+import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
+import {combineReducers} from "redux";
+import thunk from "redux-thunk";
+import {taskReducer} from "../features/Todolists/Todolist/Task/tasks-reducer";
+import {todoListReducer} from "../features/Todolists/Todolist/todolist-reducer";
+import {appReducer} from "./app-reducer";
+import {authReducer} from "./auth-reducer";
 
 const rootReducer = combineReducers({
     tasks: taskReducer,
@@ -23,9 +23,7 @@ export const store = configureStore({
 
 export const useAppSelector: TypedUseSelectorHook<RootStateType> = useSelector
 
-export type RootAppActionsType = AppActionType | AuthActionType | TasksActionType | TodolistsActionType
+export type AppDispatch = typeof store.dispatch
+export const useAppDispatch = () => useDispatch<AppDispatch>()
 
-export type AppThunk<ReturnType = void> = ThunkAction<ReturnType,
-    RootStateType,
-    unknown,
-    RootAppActionsType>
+export type NullableType<T> = null | T

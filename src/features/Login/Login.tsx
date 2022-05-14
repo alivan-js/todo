@@ -1,18 +1,23 @@
 import FormLabel from "@mui/material/FormLabel/FormLabel"
 import React from "react"
 import {Button, Checkbox, FormControl, FormControlLabel, FormGroup, Grid, TextField} from "@mui/material";
-import {useFormik} from 'formik';
-import {useDispatch} from "react-redux";
+import {FormikHelpers, useFormik} from 'formik';
 import {loginTC} from "../../app/auth-reducer";
-import {useAppSelector} from "../../app/store";
+import {useAppDispatch, useAppSelector} from "../../app/store";
 import {Navigate} from "react-router-dom";
 import {LoginParamsType} from "../../api/todolist-api";
+
+type FormValuesType = {
+    email: string,
+    password: string,
+    rememberMe: boolean
+}
 
 export const Login = () => {
 
     const isLogin = useAppSelector<boolean>(state => state.auth.isLogin)
 
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
 
     const formik = useFormik({
         initialValues: {
@@ -25,9 +30,10 @@ export const Login = () => {
 
             if (!values.email) {
                 errors.email = 'Required';
-            } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-                errors.email = 'Invalid email address';
             }
+            // else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
+            //     errors.email = 'Invalid email address';
+            // }
 
             if (!values.password) {
                 errors.password = 'Required';
@@ -37,9 +43,15 @@ export const Login = () => {
 
             return errors;
         },
-        onSubmit: values => {
-            dispatch(loginTC(values))
-            formik.resetForm()
+        onSubmit: async (values, formikHelpers: FormikHelpers<FormValuesType>) => {
+            const resultAction = await dispatch(loginTC(values))
+            if (loginTC.rejected.match(resultAction)) {
+                if (resultAction.payload?.fieldsErrors?.length) {
+                    const error = resultAction.payload?.fieldsErrors[0]
+                    formikHelpers.setFieldError(error.field, error.error)
+                }
+
+            }
         },
     });
 

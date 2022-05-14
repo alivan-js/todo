@@ -35,27 +35,27 @@ const TodoList = React.memo((props: ToDoListProps) => {
     }, [])
 
     const addTaskCallback = useCallback((text: string) => {
-        dispatch(addTaskTC(props.todolist.id, text))
+        dispatch(addTaskTC({todolistId: props.todolist.id, title: text}))
     }, [dispatch, props.todolist.id])
 
     const changeStatusTaskCallback = useCallback((status: number, taskID: string) => {
-        dispatch(changeTaskStatusTC(props.todolist.id, taskID, status))
+        dispatch(changeTaskStatusTC({todolistID: props.todolist.id, taskID: taskID, status}))
     }, [dispatch, props.todolist.id])
 
     const changeTextTaskCallback = useCallback((text: string, taskID: string) => {
-        dispatch(changeTaskTitleTC(props.todolist.id, taskID, text))
+        dispatch(changeTaskTitleTC({todolistID: props.todolist.id, taskID, title: text}))
     }, [dispatch, props.todolist.id])
 
     const deleteTaskCallback = useCallback((taskID: string) => {
-        dispatch(deleteTaskTC(props.todolist.id, taskID))
+        dispatch(deleteTaskTC({todolistID: props.todolist.id, taskID}))
     }, [dispatch, props.todolist.id])
 
     const changeTodolistTitleText = useCallback((text: string,) => {
-        dispatch(changeTodolistTitleTC(props.todolist.id, text))
+        dispatch(changeTodolistTitleTC({id: props.todolist.id, title: text}))
     }, [dispatch, props.todolist.id])
 
     const onClickRemoveTodolistHandler = useCallback(() => {
-        dispatch(removeTodolistTC(props.todolist.id))
+        dispatch(removeTodolistTC({id: props.todolist.id}))
     }, [dispatch, props.todolist.id])
 
     const onAllClickHandler = useCallback(() => {
